@@ -30,9 +30,9 @@ public class InfixToPostfix {
      */
     private static int precedence(String op) {
         // TODO: return 2 for "*" and "/", 1 for "+" and "-", 0 otherwise
-        if(op.equals("*")) {
+        if(op.equals("*")||op.equals("/")) {
             return 2;
-        } else if(op.equals("/")) {
+        } else if(op.equals("+")||op.equals("-")) {
             return 1;
         }
         return 0;
@@ -79,21 +79,34 @@ public class InfixToPostfix {
         Stack<String> stack = new Stack<>();
         StringBuilder output = new StringBuilder();
 
-        for(int i = 0; i < infix.length(); i++) {
-            String str = infix.substring(i,i+1);
-            if(isOperator(str)) {
-                while(true) {
-                    if(precedence(str) >= precedence(stack.peek())) {
-                        stack.push(str);
-                        break;
-                    } else {
-                        stack.push(infix.substring(i-1,i));
-                    }
-                }
+        String[] tokens = infix.split(" ");
+        for(String token : tokens) {
+            if(token.isEmpty()) continue;
 
+            if(isOperator(token)) {
+                while(!stack.isEmpty() && !stack.peek().equals("(") && precedence(stack.peek()) >= precedence(token)) {
+                    output.append(stack.pop()).append(" ");
+                }
+                stack.push(token);
+            } else if(token.equals("(")) {
+                stack.push(token);
+            } else if(token.equals(")")) {
+                while(!stack.isEmpty() && !stack.peek().equals("(")) {
+                    output.append(stack.pop()).append(" ");
+                }
+                if(!stack.isEmpty() && stack.peek().equals("(")) {
+                    stack.pop();
+                }
+            } else {
+                output.append(token).append(" ");
             }
         }
-        return output.toString().trim();
+
+        while(!stack.isEmpty()) {
+            output.append(stack.pop()).append(" ");
+        }
+        output.deleteCharAt(output.length()-1);
+        return output.toString();
     }
 
     // ---------------------------------------------------------------
